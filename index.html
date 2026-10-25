@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>많이 이용하는 매체를 더 신뢰할까? | 미디어 데이터분석 연구 계획 발표</title>
+  <!-- Modern Typography Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Color Palette */
+      --bg-canvas: #090d16;
+      --bg-slide: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-card: #ffffff;
+      
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --text-sub: #64748b;
+      --text-light: #94a3b8;
+      
+      --brand-navy: #1e293b;
+      --brand-navy-deep: #0f172a;
+      --brand-blue: #2563eb;
+      --brand-blue-dark: #1d4ed8;
+      --brand-blue-light: #3b82f6;
+      --brand-blue-pale: #eff6ff;
+      --brand-blue-border: #bfdbfe;
+      
+      --accent-teal: #0d9488;
+      --accent-teal-pale: #f0fdfa;
+      --accent-indigo: #4f46e5;
+      --accent-amber: #d97706;
+      --accent-amber-pale: #fffbeb;
+      --accent-rose: #e11d48;
+      
+      --border-light: #e2e8f0;
+      --border-medium: #cbd5e1;
+      
+      --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 10px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      
+      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-canvas);
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 16:9 Deck Presentation Window */
+    #deck-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 56.25vw; /* 16:9 */
+      max-height: 100vh;
+      max-width: 177.78vh; /* 16:9 */
+      background: var(--bg-slide);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Progress Bar */
+    .deck-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: #e2e8f0;
+      z-index: 100;
+    }
+    .deck-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+      width: 12.5%;
+      transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Slides Container */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 3.2% 4.8% 3.2% 4.8%;
+      display: none;
+      flex-direction: column;
+      background: var(--bg-slide);
+      opacity: 0;
+      transform: scale(0.99);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2%;
+      padding-bottom: 1.2%;
+      border-bottom: 1px solid var(--border-light);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .slide-tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--brand-blue);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .slide-tag::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--brand-blue);
+      border-radius: 2px;
+    }
+
+    .slide-title {
+      font-size: 1.68rem;
+      font-weight: 800;
+      color: var(--brand-navy-deep);
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .slide-subtitle {
+      font-size: 0.92rem;
+      color: var(--text-sub);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .header-meta {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--brand-navy);
+      background: var(--bg-subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* Slide Main Body */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: 2.2%;
+      min-height: 0; /* Prevents overflow in flexbox */
+      position: relative;
+    }
+
+    /* Footer & Navigation Controls */
+    .slide-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+      padding-top: 1.2%;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+    }
+
+    .slide-counter {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      color: var(--brand-navy);
+      font-size: 0.82rem;
+    }
+
+    /* Grid & Flex Helpers */
+    .col-half { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .col-60 { flex: 1.4; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .col-40 { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .col-full { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    /* Modern Card Styles */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      transition: border-color 0.2s ease;
+    }
+
+    .card.blue-tint {
+      background: #f8faff;
+      border-color: var(--brand-blue-border);
+    }
+
+    .card.dark-navy {
+      background: var(--brand-navy-deep);
+      border-color: #334155;
+      color: #ffffff;
+    }
+
+    .card.amber-tint {
+      background: var(--accent-amber-pale);
+      border-color: #fde68a;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--brand-navy);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .card.dark-navy .card-title {
+      color: #ffffff;
+    }
+
+    .card-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card.dark-navy .card-desc {
+      color: #cbd5e1;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .badge-blue { background: var(--brand-blue-pale); color: var(--brand-blue); border: 1px solid var(--brand-blue-border); }
+    .badge-navy { background: #334155; color: #ffffff; }
+    .badge-amber { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-teal { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+
+    /* Seaborn Themed Chart Frame */
+    .seaborn-frame {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+
+    .seaborn-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--border-light);
+    }
+
+    .seaborn-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--brand-navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .seaborn-code-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--brand-blue);
+      background: var(--brand-blue-pale);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .seaborn-disclaimer {
+      font-size: 0.68rem;
+      color: var(--text-light);
+      text-align: right;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* Step boxes (Pipeline) */
+    .pipeline-step {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s ease;
+    }
+
+    .pipeline-step:hover {
+      border-color: var(--brand-blue);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .step-idx {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--brand-blue);
+      margin-bottom: 4px;
+    }
+
+    .step-head {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--brand-navy);
+      margin-bottom: 4px;
+    }
+
+    .step-text {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    /* Tables */
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      text-align: left;
+    }
+
+    .custom-table th {
+      background: var(--bg-subtle);
+      color: var(--brand-navy);
+      font-weight: 700;
+      padding: 8px 10px;
+      border-top: 1px solid var(--border-light);
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .custom-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-muted);
+      vertical-align: middle;
+    }
+
+    /* Feature Lists */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .feature-list li .bullet {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--brand-blue);
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+
+    /* Floating navigation arrows */
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border-light);
+      color: var(--brand-navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      transition: all 0.2s ease;
+      z-index: 60;
+      opacity: 0.35;
+    }
+
+    #deck-wrapper:hover .nav-arrow {
+      opacity: 0.85;
+    }
+
+    .nav-arrow:hover {
+      opacity: 1 !important;
+      background: #ffffff;
+      color: var(--brand-blue);
+      transform: translateY(-50%) scale(1.08);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .nav-prev { left: 14px; }
+    .nav-next { right: 14px; }
+
+    /* Top Right Presentation Controls (Fullscreen & Quick Nav) */
+    .top-controls {
+      position: absolute;
+      top: 14px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 70;
+    }
+
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--border-light);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ctrl-btn:hover {
+      background: #ffffff;
+      color: var(--brand-blue);
+      border-color: var(--brand-blue-border);
+    }
+
+    /* Bottom dots */
+    .deck-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--border-light);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .dot.active {
+      background: var(--brand-blue);
+      width: 18px;
+      border-radius: 6px;
+    }
+
+    /* Key press badge in footer */
+    .key-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-sub);
+    }
+
+    /* Link button */
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-navy-deep);
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-link:hover {
+      background: var(--brand-blue);
+      transform: translateY(-1px);
+    }
+
+    /* Cover Visual Specifics */
+    .cover-visual-wrap {
+      position: absolute;
+      right: 1%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 45%;
+      height: 82%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* SVG diagram responsive sizing */
+    svg.deck-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="deck-wrapper">
+    <!-- Top Progress Indicator -->
+    <div class="deck-progress-bar">
+      <div class="deck-progress-fill" id="progress-bar"></div>
+    </div>
+
+    <!-- Top Action Controls -->
+    <div class="top-controls">
+      <button class="ctrl-btn" id="btn-fullscreen" title="전체화면 전환 (F 키)">
+        <span>⛶ 전체화면</span>
+      </button>
+    </div>
+
+    <!-- Navigation Floating Arrows -->
+    <button class="nav-arrow nav-prev" id="btn-prev" title="이전 슬라이드 (← 키)">‹</button>
+    <button class="nav-arrow nav-next" id="btn-next" title="다음 슬라이드 (→ 키)">›</button>
+
+    <!-- ==========================================================
+         SLIDE 1: 표지 (Cover)
+         ========================================================== -->
+    <section class="slide active" id="slide-1" data-index="1">
+      <div style="display:flex; flex-direction:column; justify-content:center; height:100%; width:55%; position:relative; z-index:2;">
+        <div style="display:inline-flex; align-items:center; gap:8px; background:var(--brand-blue-pale); border:1px solid var(--brand-blue-border); padding:5px 12px; border-radius:30px; font-size:0.82rem; font-weight:700; color:var(--brand-blue); margin-bottom:20px; width:fit-content;">
+          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--brand-blue);"></span>
+          데이터분석 연구 계획 발표 (Proposal)
+        </div>
+
+        <h1 style="font-size:2.85rem; font-weight:900; color:var(--brand-navy-deep); line-height:1.15; letter-spacing:-0.035em; margin-bottom:14px;">
+          많이 이용하는 매체를<br>
+          <span style="color:var(--brand-blue);">더 신뢰할까?</span>
+        </h1>
+
+        <p style="font-size:1.25rem; font-weight:500; color:var(--text-sub); line-height:1.45; margin-bottom:28px;">
+          매체별 뉴스 이용률과 신뢰도 비교를 통한<br>디지털 뉴스 소비 분석 계획
+        </p>
+
+        <!-- Metadata Grid Box -->
+        <div style="display:grid; grid-template-columns:repeat(3, auto); gap:20px; background:var(--bg-subtle); border:1px solid var(--border-light); padding:14px 20px; border-radius:var(--radius-lg); width:fit-content;">
+          <div>
+            <div style="font-size:0.68rem; text-transform:uppercase; color:var(--text-light); font-weight:700; letter-spacing:0.05em;">과제 성격</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--brand-navy); margin-top:2px;">분석 계획 수립 (결과단정 배제)</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem; text-transform:uppercase; color:var(--text-light); font-weight:700; letter-spacing:0.05em;">예정 데이터</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--brand-navy); margin-top:2px;">언론진흥재단 언론수용자 조사</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem; text-transform:uppercase; color:var(--text-light); font-weight:700; letter-spacing:0.05em;">대상 매체군</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--brand-navy); margin-top:2px;">TV · 포털 · 동영상 · SNS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cover Right Illustration (Interactive SVG Graphic) -->
+      <div class="cover-visual-wrap">
+        <svg viewBox="0 0 540 420" class="deck-svg" id="cover-svg-element">
+          <!-- Background Grid Matrix -->
+          <g stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 4" opacity="0.8">
+            <line x1="50" y1="40" x2="490" y2="40" />
+            <line x1="50" y1="120" x2="490" y2="120" />
+            <line x1="50" y1="200" x2="490" y2="200" />
+            <line x1="50" y1="280" x2="490" y2="280" />
+            <line x1="50" y1="360" x2="490" y2="360" />
+            <line x1="60" y1="30" x2="60" y2="380" />
+            <line x1="270" y1="30" x2="270" y2="380" />
+            <line x1="480" y1="30" x2="480" y2="380" />
+          </g>
+
+          <!-- Connecting Curves -->
+          <path id="cv-line-1" d="M 140 130 C 220 130, 220 290, 400 290" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+          <path id="cv-line-2" d="M 140 210 C 230 210, 230 140, 400 140" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.75"/>
+          <path id="cv-line-3" d="M 140 290 C 210 290, 240 220, 400 220" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+          <!-- Pillar 1: 이용률 (Reach Axis) -->
+          <g class="cv-pillar" id="cv-pillar-use">
+            <rect x="70" y="80" width="140" height="250" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="drop-shadow(0 10px 15px rgba(15,23,42,0.08))"/>
+            <rect x="82" y="96" width="116" height="32" rx="6" fill="#eff6ff"/>
+            <text x="140" y="117" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">뉴스 이용률 축</text>
+            
+            <rect x="85" y="142" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="96" y="163" font-size="11" font-weight="700" fill="#334155">📺 TV 방송</text>
+
+            <rect x="85" y="184" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="96" y="205" font-size="11" font-weight="700" fill="#334155">🌐 인터넷 포털</text>
+
+            <rect x="85" y="226" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="96" y="247" font-size="11" font-weight="700" fill="#334155">▶️ 온라인 동영상</text>
+
+            <rect x="85" y="268" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="96" y="289" font-size="11" font-weight="700" fill="#334155">📱 소셜미디어</text>
+          </g>
+
+          <!-- Center Question Hub -->
+          <g class="cv-hub" id="cv-center-hub">
+            <circle cx="270" cy="205" r="42" fill="#0f172a" filter="drop-shadow(0 10px 20px rgba(37,99,235,0.25))"/>
+            <circle cx="270" cy="205" r="50" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6 4" opacity="0.6"/>
+            <text x="270" y="214" text-anchor="middle" font-size="24" font-weight="900" fill="#ffffff">VS</text>
+            <rect x="228" y="258" width="84" height="22" rx="11" fill="#2563eb"/>
+            <text x="270" y="273" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff">일치성 검증?</text>
+          </g>
+
+          <!-- Pillar 2: 신뢰도 (Trust Axis) -->
+          <g class="cv-pillar" id="cv-pillar-trust">
+            <rect x="330" y="80" width="140" height="250" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="drop-shadow(0 10px 15px rgba(15,23,42,0.08))"/>
+            <rect x="342" y="96" width="116" height="32" rx="6" fill="#f0fdfa"/>
+            <text x="400" y="117" text-anchor="middle" font-size="12" font-weight="800" fill="#0d9488">뉴스 신뢰도 축</text>
+
+            <rect x="345" y="142" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="356" y="163" font-size="11" font-weight="700" fill="#334155">⭐ 높은 공신력?</text>
+
+            <rect x="345" y="184" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="356" y="205" font-size="11" font-weight="700" fill="#334155">⚖️ 편의 vs 신뢰?</text>
+
+            <rect x="345" y="226" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="356" y="247" font-size="11" font-weight="700" fill="#334155">🔍 알고리즘 왜곡?</text>
+
+            <rect x="345" y="268" width="110" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+            <text x="356" y="289" font-size="11" font-weight="700" fill="#334155">⚠️ 불신 속 소비?</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>데이터분석 프로젝트 제안 발표</span>
+          <span>·</span>
+          <span>주제 소개 및 연구 계획서</span>
+        </div>
+        <div class="footer-right">
+          <div class="deck-dots" id="dots-container"></div>
+          <span class="key-badge">키보드 [← / →]</span>
+          <div class="slide-counter">01 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 2: 연구 배경 및 문제 제기
+         ========================================================== -->
+    <section class="slide" id="slide-2" data-index="2">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">01. 연구 배경 & 문제 제기</div>
+          <h2 class="slide-title">디지털 환경에서 뉴스 소비와 신뢰의 괴리</h2>
+          <p class="slide-subtitle">다양해진 뉴스 유통 경로 속에서 '이용량'과 '신뢰성'을 별개의 축으로 구분해야 할 필요성</p>
+        </div>
+        <div class="header-meta">BACKGROUND & PROBLEM</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="col-half" style="flex:1.1;">
+          <div class="card blue-tint" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div class="card-title">
+                <span class="badge badge-blue">배경 1</span>
+                디지털 뉴스 유통 경로의 급격한 다변화
+              </div>
+              <p class="card-desc" style="margin-bottom:12px;">
+                전통적인 TV 방송과 인쇄 신문 중심의 레거시 미디어 환경에서 벗어나, 현재는 <strong>포털 뉴스 애그리게이터, 유튜브 등 온라인 동영상 플랫폼, SNS</strong>가 주요 뉴스 관문으로 자리 잡았습니다.
+              </p>
+              <div style="background:#ffffff; padding:10px 12px; border-radius:8px; border:1px solid var(--brand-blue-border); font-size:0.8rem; color:var(--text-muted); line-height:1.45;">
+                📌 <strong>환경 변화의 특징:</strong> 매체 접근 장벽이 극도로 낮아지며 알고리즘에 의해 뉴스를 <em>'수동적·습관적'</em>으로 접촉하는 비중이 비약적으로 증가함.
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="card-title">
+                <span class="badge badge-teal">배경 2</span>
+                '뉴스 이용'과 '뉴스 신뢰'의 개념적 분리
+              </div>
+              <p class="card-desc">
+                매체 접촉 빈도가 높고 이용 시간이 길다고 해서 이용자가 그 매체의 뉴스를 진실하다고 믿는 것은 아닙니다. <strong>"손이 자주 가는 편리한 매체"</strong>와 <strong>"마음으로 신뢰하는 권위 있는 매체"</strong>는 전혀 다른 차원의 개념입니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-half" style="flex:0.9;">
+          <!-- Core Problem Statement Box -->
+          <div class="card dark-navy">
+            <span class="badge badge-amber" style="margin-bottom:6px;">핵심 문제의식 (Problem Statement)</span>
+            <div style="font-size:1.18rem; font-weight:800; line-height:1.35; margin-bottom:8px; color:#ffffff;">
+              "우리는 가장 자주 이용하는 뉴스 매체를<br>그만큼 가장 신뢰하고 있는가?"
+            </div>
+            <p class="card-desc" style="font-size:0.8rem;">
+              알고리즘 추천과 자극적 콘텐츠로 인해 이용률은 폭발적으로 늘었지만 신뢰도는 낮을 수 있으며, 반대로 전통 방송은 이용률이 줄어도 신뢰는 견고할 수 있다는 가설적 의문이 연구의 출발점입니다.
+            </p>
+          </div>
+
+          <!-- Conceptual Visual: Reach vs Credibility Discrepancy -->
+          <div class="seaborn-frame" style="flex:1; justify-content:center;">
+            <div class="seaborn-header">
+              <span class="seaborn-title">💡 개념 대비: 이용(행동) vs 신뢰(태도)</span>
+              <span class="seaborn-code-tag">Conceptual Framework</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-around; align-items:center; height:105px;">
+              <!-- Consumption Block -->
+              <div style="text-align:center; width:42%;">
+                <div style="height:54px; background:#eff6ff; border:2px dashed #3b82f6; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                  <span style="font-size:0.75rem; font-weight:700; color:#2563eb;">행동적 차원</span>
+                  <span style="font-size:0.98rem; font-weight:800; color:#1e293b;">뉴스 이용률 (Reach)</span>
+                </div>
+                <span style="font-size:0.7rem; color:var(--text-sub); margin-top:3px; display:block;">접근 편의성 · 노출 빈도</span>
+              </div>
+
+              <!-- Question Divergence -->
+              <div style="font-size:1.25rem; font-weight:900; color:var(--accent-amber); display:flex; flex-direction:column; align-items:center;">
+                <span>≠ ?</span>
+                <span style="font-size:0.62rem; color:var(--text-light); font-weight:600;">불일치 가능성</span>
+              </div>
+
+              <!-- Credibility Block -->
+              <div style="text-align:center; width:42%;">
+                <div style="height:54px; background:#f0fdfa; border:2px dashed #0d9488; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                  <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">태도적 차원</span>
+                  <span style="font-size:0.98rem; font-weight:800; color:#1e293b;">뉴스 신뢰도 (Trust)</span>
+                </div>
+                <span style="font-size:0.7rem; color:var(--text-sub); margin-top:3px; display:block;">정확성 · 공정성 평가</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>01. 연구 배경 및 문제 제기</span>
+          <span>·</span>
+          <span>미디어 환경 변화와 이용-신뢰 분리 현상</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">02 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 3: 연구 목적 및 연구 질문
+         ========================================================== -->
+    <section class="slide" id="slide-3" data-index="3">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">02. 연구 목적 & 질문</div>
+          <h2 class="slide-title">연구 목적 및 핵심 연구 질문</h2>
+          <p class="slide-subtitle">매체별 뉴스 이용률과 신뢰도의 일치 여부를 탐구하기 위한 명확한 연구 범위와 질문</p>
+        </div>
+        <div class="header-meta">OBJECTIVES & QUESTIONS</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Left: Core Questions -->
+        <div class="col-half">
+          <div class="card dark-navy">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span class="badge badge-blue">핵심 연구 질문 (Primary RQ)</span>
+              <span style="font-family:var(--font-mono); font-size:0.7rem; color:#94a3b8;">Main Question</span>
+            </div>
+            <div style="font-size:1.22rem; font-weight:800; line-height:1.35; color:#ffffff;">
+              "사람들이 뉴스를 접하기 위해 자주 이용하는 매체와<br>
+              <span style="color:#60a5fa;">뉴스를 신뢰하는 매체</span>는 일치하는가?"
+            </div>
+          </div>
+
+          <div class="card" style="flex:1; display:flex; flex-direction:column; justify-content:space-around;">
+            <div>
+              <div class="card-title">
+                <span class="badge badge-navy">세부 질문 1</span>
+                매체 유형별 순위 역전 현상 탐색
+              </div>
+              <p class="card-desc">
+                TV, 인터넷 포털, 온라인 동영상, SNS의 <strong>이용률 순위</strong>와 <strong>신뢰도 순위</strong> 간에 차이나 역전이 발생하는 특정 매체군이 존재하는가?
+              </p>
+            </div>
+
+            <div style="border-top:1px solid var(--border-light); padding-top:10px;">
+              <div class="card-title">
+                <span class="badge badge-teal">세부 질문 2</span>
+                연령대별 이용-신뢰 패턴 분화 (보조 탐색)
+              </div>
+              <p class="card-desc">
+                세대별(청년층 vs 중장년층)로 디지털 매체와 레거시 매체에 대한 <strong>주 이용 매체와 신뢰 매체의 일치성</strong>에 차이가 관찰되는가? (자료 확보 시)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Target Channels & Scope -->
+        <div class="col-half">
+          <div class="card blue-tint" style="height:100%; display:flex; flex-direction:column;">
+            <div class="card-title" style="margin-bottom:10px;">
+              <span class="badge badge-blue">연구 대상</span>
+              비교 대상 4대 뉴스 매체군 및 연구 범위
+            </div>
+
+            <div class="grid-2" style="gap:10px; flex:1;">
+              <div class="card" style="padding:10px 12px; background:#ffffff;">
+                <div style="font-weight:700; color:var(--brand-navy); font-size:0.88rem; margin-bottom:3px;">
+                  📺 TV 방송
+                </div>
+                <div style="font-size:0.76rem; color:var(--text-sub); line-height:1.4;">
+                  지상파·종편·보도전문채널을 포괄하는 전통적 레거시 시청각 뉴스 매체
+                </div>
+              </div>
+
+              <div class="card" style="padding:10px 12px; background:#ffffff;">
+                <div style="font-weight:700; color:var(--brand-navy); font-size:0.88rem; margin-bottom:3px;">
+                  🌐 인터넷 포털
+                </div>
+                <div style="font-size:0.76rem; color:var(--text-sub); line-height:1.4;">
+                  네이버·다음 등 알고리즘 기반 뉴스 기사 집약적 디지털 관문
+                </div>
+              </div>
+
+              <div class="card" style="padding:10px 12px; background:#ffffff;">
+                <div style="font-weight:700; color:var(--brand-navy); font-size:0.88rem; margin-bottom:3px;">
+                  ▶️ 온라인 동영상
+                </div>
+                <div style="font-size:0.76rem; color:var(--text-sub); line-height:1.4;">
+                  유튜브 등 동영상 스트리밍 플랫폼 내 방송사/크리에이터 뉴스 채널
+                </div>
+              </div>
+
+              <div class="card" style="padding:10px 12px; background:#ffffff;">
+                <div style="font-weight:700; color:var(--brand-navy); font-size:0.88rem; margin-bottom:3px;">
+                  📱 소셜미디어 (SNS)
+                </div>
+                <div style="font-size:0.76rem; color:var(--text-sub); line-height:1.4;">
+                  인스타그램, 페이스북, X 등 소셜 피드를 통한 관계 기반 바이럴 뉴스
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px; padding:10px 12px; background:#ffffff; border-radius:8px; border:1px solid var(--border-light); font-size:0.78rem; color:var(--text-muted);">
+              <strong>⚖️ 연구의 기본 원칙:</strong> 연구 결과를 예단하지 않고, 동일한 시점과 공통 표본에서 산출된 지표를 중립적으로 대조하여 현상을 규명하는 데 집중함.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>02. 연구 목적 및 연구 질문</span>
+          <span>·</span>
+          <span>핵심 RQ와 4대 매체 비교 분석 범위</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">03 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 4: 데이터 출처 및 확보 계획
+         ========================================================== -->
+    <section class="slide" id="slide-4" data-index="4">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">03. 데이터 출처 & 확보 계획</div>
+          <h2 class="slide-title">한국언론진흥재단 「언론수용자 조사」 활용 계획</h2>
+          <p class="slide-subtitle">국가승인통계의 공신력을 바탕으로 매체별 이용 행태와 신뢰도를 체계적으로 검증</p>
+        </div>
+        <div class="header-meta">DATA SOURCE & STRATEGY</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Left: Dataset Profile & Rationale -->
+        <div class="col-60">
+          <div class="card" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span class="badge badge-blue">후보 데이터셋 개요</span>
+                <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-light);">KPF Audience Survey</span>
+              </div>
+
+              <div style="margin-bottom:12px;">
+                <h3 style="font-size:1.12rem; color:var(--brand-navy); margin-bottom:4px;">
+                  한국언론진흥재단 (KPF) 「언론수용자 조사」
+                </h3>
+                <p class="card-desc">
+                  국내 미디어 수용자의 이용 행태, 뉴스 소비 패턴, 언론 신뢰도를 포괄적으로 측정하는 대한민국 대표 미디어 국가승인통계입니다.
+                </p>
+              </div>
+
+              <div class="card-title" style="font-size:0.92rem; margin-bottom:8px;">
+                📌 본 연구에 해당 자료를 활용하려는 이유
+              </div>
+
+              <ul class="feature-list">
+                <li>
+                  <span class="bullet"></span>
+                  <div><strong>전국 단위 대표성:</strong> 층화확률비례추출을 거쳐 성별, 연령, 지역별 편향 없이 국민 전체의 인식을 반영</div>
+                </li>
+                <li>
+                  <span class="bullet"></span>
+                  <div><strong>동일 설문 내 병행 측정:</strong> 매체별 '이용 빈도/비율'과 '신뢰도' 문항을 동일 응답자에게 측정하여 비교 타당성 확보</div>
+                </li>
+                <li>
+                  <span class="bullet"></span>
+                  <div><strong>디지털 플랫폼의 체계적 분류:</strong> 포털, 동영상 플랫폼, SNS를 세부 카테고리로 분리 조사하여 디지털 소비 분석에 최적화</div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Official Link Box -->
+            <div style="margin-top:12px; padding:10px 14px; background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:0.72rem; color:var(--text-sub); font-weight:700;">공식 원자료 및 보고서 아카이브 링크</div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--brand-blue); word-break:break-all;">
+                  https://media.kpf.or.kr/web/media/main.do?dbComFileId=TR10152202
+                </div>
+              </div>
+              <a href="https://media.kpf.or.kr/web/media/main.do?dbComFileId=TR10152202" target="_blank" class="btn-link" style="padding:6px 10px; font-size:0.72rem; white-space:nowrap;">
+                공식 자료실 이동 ↗
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Verification Checklist -->
+        <div class="col-40">
+          <div class="card amber-tint" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div class="card-title" style="color:#92400e; margin-bottom:4px;">
+                <span class="badge badge-amber">사전 검토 사항</span>
+                분석 착수 전 필수 확인 체크리스트
+              </div>
+              <p class="card-desc" style="font-size:0.78rem; margin-bottom:10px; color:#92400e;">
+                자료의 세부 제공 형태 및 척도는 미확정 상태이며, 데이터 입수 시 아래 조건을 우선 점검할 예정입니다.
+              </p>
+
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div class="card" style="padding:8px 10px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy);">
+                    1. 자료 제공 형태 (원자료 vs 집계표)
+                  </div>
+                  <div style="font-size:0.73rem; color:var(--text-sub); margin-top:2px;">
+                    개인별 마이크로데이터(MDIS)인지 간행물 요약 통계표인지 확인하여 분석 깊이 결정
+                  </div>
+                </div>
+
+                <div class="card" style="padding:8px 10px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy);">
+                    2. 조사 연도 최신성 및 일치
+                  </div>
+                  <div style="font-size:0.73rem; color:var(--text-sub); margin-top:2px;">
+                    가장 최신 연도(2023 또는 2024년 발표분)를 단일 기준으로 확정
+                  </div>
+                </div>
+
+                <div class="card" style="padding:8px 10px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy);">
+                    3. 신뢰도 측정 척도 방식
+                  </div>
+                  <div style="font-size:0.73rem; color:var(--text-sub); margin-top:2px;">
+                    5점 리커트 척도 평균값인지 '신뢰함' 비율(%)인지 확인 후 표준화
+                  </div>
+                </div>
+
+                <div class="card" style="padding:8px 10px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy);">
+                    4. 매체 분류의 독립성
+                  </div>
+                  <div style="font-size:0.73rem; color:var(--text-sub); margin-top:2px;">
+                    온라인 동영상과 SNS가 분리 집계되었는지 설문지 문항 대조
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:0.7rem; color:#b45309; font-weight:600; text-align:right;">
+              ※ 미확정 변수는 자료 확보 후 최종 확정 예정
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>03. 데이터 출처 및 확보 계획</span>
+          <span>·</span>
+          <span>한국언론진흥재단 언론수용자 조사 및 사전 검토 리스트</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">04 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 5: 주요 변수 및 개념 정의
+         ========================================================== -->
+    <section class="slide" id="slide-5" data-index="5">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">04. 주요 변수 & 개념 정의</div>
+          <h2 class="slide-title">분석에 활용할 핵심 변수와 개념적 모델</h2>
+          <p class="slide-subtitle">매체 유형을 기준으로 행동적 지표(이용률)와 태도적 지표(신뢰도) 간의 관계를 설계</p>
+        </div>
+        <div class="header-meta">VARIABLES & FRAMEWORK</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="col-full" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+          <!-- 4 Variable Cards Grid -->
+          <div class="grid-4">
+            <!-- Var 1: 매체 유형 -->
+            <div class="card" style="border-top:3px solid var(--brand-blue);">
+              <span class="badge badge-blue" style="margin-bottom:4px;">구분 기준 변수</span>
+              <div class="card-title" style="font-size:0.92rem;">매체 유형 (Medium)</div>
+              <p class="card-desc" style="font-size:0.76rem;">
+                <strong>TV, 인터넷 포털, 온라인 동영상, SNS</strong> 등 비교의 축이 되는 4대 핵심 미디어 분류
+              </p>
+              <div style="margin-top:6px; font-size:0.7rem; color:var(--brand-blue); font-weight:700;">역할: 범주형 독립/비교 기준</div>
+            </div>
+
+            <!-- Var 2: 뉴스 이용률 -->
+            <div class="card" style="border-top:3px solid var(--accent-indigo);">
+              <span class="badge badge-navy" style="margin-bottom:4px;">행동적 관측 지표</span>
+              <div class="card-title" style="font-size:0.92rem;">뉴스 이용률 (Reach)</div>
+              <p class="card-desc" style="font-size:0.76rem;">
+                해당 매체를 통해 뉴스를 접촉·소비하는 수용자의 비율(%) 또는 정기 이용 빈도
+              </p>
+              <div style="margin-top:6px; font-size:0.7rem; color:var(--accent-indigo); font-weight:700;">역할: 양적 접촉도 및 도달 범위</div>
+            </div>
+
+            <!-- Var 3: 뉴스 신뢰도 -->
+            <div class="card" style="border-top:3px solid var(--accent-teal);">
+              <span class="badge badge-teal" style="margin-bottom:4px;">태도적 관측 지표</span>
+              <div class="card-title" style="font-size:0.92rem;">뉴스 신뢰도 (Trust)</div>
+              <p class="card-desc" style="font-size:0.76rem;">
+                해당 매체의 뉴스 보도가 공정하고 정확하며 믿을 만하다고 인식하는 정도 (점수/비율)
+              </p>
+              <div style="margin-top:6px; font-size:0.7rem; color:var(--accent-teal); font-weight:700;">역할: 질적 공신력 및 신뢰 평가</div>
+            </div>
+
+            <!-- Var 4: 연령대 -->
+            <div class="card" style="border-top:3px solid var(--accent-amber);">
+              <span class="badge badge-amber" style="margin-bottom:4px;">보조/통제 변수</span>
+              <div class="card-title" style="font-size:0.92rem;">연령대 (Age Group)</div>
+              <p class="card-desc" style="font-size:0.76rem;">
+                20대부터 60대 이상까지 세대별 분절을 통해 디지털 친숙도에 따른 차이 검토
+              </p>
+              <div style="margin-top:6px; font-size:0.7rem; color:var(--accent-amber); font-weight:700;">역할: 세대별 양상 세분화</div>
+            </div>
+          </div>
+
+          <!-- Conceptual SVG Diagram: Variable Relationship -->
+          <div class="seaborn-frame" style="flex:1; justify-content:center; padding:12px 16px;">
+            <div class="seaborn-header" style="margin-bottom:4px;">
+              <span class="seaborn-title">📊 연구 변수 간 개념적 관계 모델 (Conceptual Framework)</span>
+              <span class="seaborn-code-tag">Model Architecture</span>
+            </div>
+
+            <div style="flex:1; width:100%; position:relative;">
+              <svg viewBox="0 0 960 150" class="deck-svg" id="variable-model-svg">
+                <!-- Group 1: Media Types -->
+                <rect x="25" y="20" width="200" height="110" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="125" y="44" text-anchor="middle" font-size="12" font-weight="800" fill="#1e293b">매체 유형 (Medium)</text>
+                <text x="125" y="68" text-anchor="middle" font-size="11" fill="#475569">📺 TV 방송</text>
+                <text x="125" y="86" text-anchor="middle" font-size="11" fill="#475569">🌐 인터넷 포털</text>
+                <text x="125" y="104" text-anchor="middle" font-size="11" fill="#475569">▶️ 온라인 동영상 · 📱 SNS</text>
+
+                <!-- Connecting Arrows -->
+                <path d="M 225 60 L 360 42" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+                <text x="290" y="44" text-anchor="middle" font-size="10" font-weight="700" fill="#2563eb">접근 & 노출 (이용)</text>
+
+                <path d="M 225 90 L 360 108" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+                <text x="290" y="118" text-anchor="middle" font-size="10" font-weight="700" fill="#0d9488">공신력 평가 (신뢰)</text>
+
+                <!-- Box 2: Use -->
+                <rect x="370" y="18" width="180" height="48" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+                <text x="460" y="38" text-anchor="middle" font-size="12" font-weight="800" fill="#1d4ed8">뉴스 이용률 지표</text>
+                <text x="460" y="54" text-anchor="middle" font-size="10" fill="#64748b">접촉 빈도 / 일상 이용률 (%)</text>
+
+                <!-- Box 3: Trust -->
+                <rect x="370" y="84" width="180" height="48" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+                <text x="460" y="104" text-anchor="middle" font-size="12" font-weight="800" fill="#0f766e">뉴스 신뢰도 지표</text>
+                <text x="460" y="120" text-anchor="middle" font-size="10" fill="#64748b">정확성·신뢰 척도 점수/비율</text>
+
+                <!-- Comparison Hub -->
+                <path d="M 550 42 L 630 75 L 550 108" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4 3"/>
+
+                <rect x="640" y="30" width="290" height="90" rx="12" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+                <text x="785" y="58" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">핵심 분석: 일치도 & 순위 비교</text>
+                <text x="785" y="78" text-anchor="middle" font-size="11" fill="#93c5fd">"이용률 순위 = 신뢰도 순위인가?"</text>
+                <text x="785" y="100" text-anchor="middle" font-size="10" fill="#94a3b8">※ 연령대(보조변수)별 차이 교차 검증</text>
+
+                <defs>
+                  <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#2563eb" />
+                  </marker>
+                  <marker id="arrow-teal" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#0d9488" />
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>04. 주요 변수 및 개념 정의</span>
+          <span>·</span>
+          <span>4대 매체, 이용률, 신뢰도 및 개념적 관계 모델</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">05 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 6: 구체적인 데이터분석 계획
+         ========================================================== -->
+    <section class="slide" id="slide-6" data-index="6">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">05. 데이터분석 계획</div>
+          <h2 class="slide-title">기초 통계 기반 5단계 분석 절차</h2>
+          <p class="slide-subtitle">빈도와 비율을 활용한 현황 파악부터 나란한 시각화 및 데이터 형태별 분석 범위 설계</p>
+        </div>
+        <div class="header-meta">METHODOLOGY & PIPELINE</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="col-full" style="display:flex; flex-direction:column; gap:12px; height:100%;">
+          <!-- 5-Step Pipeline Steps -->
+          <div style="display:flex; gap:9px; width:100%;">
+            <div class="pipeline-step">
+              <div class="step-idx">STEP 01</div>
+              <div class="step-head">뉴스 이용 현황</div>
+              <div class="step-text">전체 응답자의 매체별 이용 여부 및 빈도·비율 기술통계 산출</div>
+            </div>
+
+            <div class="pipeline-step">
+              <div class="step-idx">STEP 02</div>
+              <div class="step-head">이용률 순위 비교</div>
+              <div class="step-text">TV, 포털, 동영상, SNS의 이용 비율 집계 및 매체별 이용 점유 순위 정렬</div>
+            </div>
+
+            <div class="pipeline-step">
+              <div class="step-idx">STEP 03</div>
+              <div class="step-head">신뢰도 순위 비교</div>
+              <div class="step-text">동일 4대 매체군에 대해 부여된 신뢰도 지표 산출 및 신뢰 순위 정렬</div>
+            </div>
+
+            <div class="pipeline-step" style="border-color:var(--brand-blue); background:#f8faff;">
+              <div class="step-idx" style="color:var(--brand-blue);">STEP 04 (핵심)</div>
+              <div class="step-head">병렬 시각적 비교</div>
+              <div class="step-text">이용률과 신뢰도를 나란히 배치한 막대그래프로 매체별 격차(Gap) 탐색</div>
+            </div>
+
+            <div class="pipeline-step">
+              <div class="step-idx">STEP 05</div>
+              <div class="step-head">연령대별 세분화</div>
+              <div class="step-text">자료 확보 시 청년층과 중장년층의 이용-신뢰 일치도 차이 교차 검토</div>
+            </div>
+          </div>
+
+          <!-- Bottom: Scenarios Table + Seaborn Bar Chart Prototype -->
+          <div class="grid-2" style="flex:1; gap:14px;">
+            <!-- Table: Aggregated vs Microdata -->
+            <div class="card" style="padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
+              <div class="card-title" style="font-size:0.88rem; margin-bottom:6px;">
+                📑 자료 형태(집계표 vs 원자료)에 따른 분석 범위 설계
+              </div>
+
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>집계 통계표만 확보한 경우</th>
+                    <th>개인별 응답 원자료(Microdata) 확보 시</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:700; color:var(--brand-navy);">분석 수준</td>
+                    <td>거시적 매체별 평균치 비교 (Aggregated)</td>
+                    <td>응답자 개인 단위 심층 교차분석 (Individual)</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700; color:var(--brand-navy);">수행 방법</td>
+                    <td>매체별 이용률 % 및 신뢰도 점수 단순 순위 대조</td>
+                    <td>개인별 이용 빈도와 신뢰도의 상관계수 및 교차표</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700; color:var(--brand-navy);">집단 비교</td>
+                    <td>공개된 연령별 요약 통계표 범위 내 비교</td>
+                    <td>다양한 연령 구간 재범주화 및 다차원 세분화</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700; color:var(--brand-navy);">해석 한계</td>
+                    <td>생태학적 오류 주의 (개인 직접 일치 증명 제한)</td>
+                    <td>개인 내 이용 매체와 신뢰 매체의 직접 일치율 검증</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div style="font-size:0.68rem; color:var(--text-light); text-align:right; margin-top:3px;">
+                ※ 최종 확보되는 자료의 공개 수준에 맞추어 분석 정밀도를 유연하게 적용할 계획입니다.
+              </div>
+            </div>
+
+            <!-- Seaborn Grouped Bar Prototype -->
+            <div class="seaborn-frame" style="flex:1;">
+              <div class="seaborn-header">
+                <span class="seaborn-title">📊 [시각화 계획] Seaborn 스타일 나란한 막대그래프</span>
+                <span class="seaborn-code-tag">sns.catplot(kind='bar')</span>
+              </div>
+
+              <!-- Animated Chart Simulation Prototype -->
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:6px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; height:100px; padding:0 16px; border-bottom:2px solid #cbd5e1; position:relative;">
+                  <!-- Background gridlines -->
+                  <div style="position:absolute; width:100%; height:1px; top:25%; left:0; background:#f1f5f9;"></div>
+                  <div style="position:absolute; width:100%; height:1px; top:50%; left:0; background:#f1f5f9;"></div>
+                  <div style="position:absolute; width:100%; height:1px; top:75%; left:0; background:#f1f5f9;"></div>
+
+                  <!-- Pair 1: TV -->
+                  <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
+                    <div style="display:flex; gap:5px; align-items:flex-end; height:80px;">
+                      <div class="proto-bar" style="width:18px; height:65%; background:#2563eb; border-radius:3px 3px 0 0;" title="이용률 지표 예시"></div>
+                      <div class="proto-bar" style="width:18px; height:80%; background:#0d9488; border-radius:3px 3px 0 0;" title="신뢰도 지표 예시"></div>
+                    </div>
+                    <span style="font-size:0.72rem; font-weight:700; color:#334155; margin-top:5px;">TV 방송</span>
+                  </div>
+
+                  <!-- Pair 2: Portal -->
+                  <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
+                    <div style="display:flex; gap:5px; align-items:flex-end; height:80px;">
+                      <div class="proto-bar" style="width:18px; height:90%; background:#2563eb; border-radius:3px 3px 0 0;"></div>
+                      <div class="proto-bar" style="width:18px; height:70%; background:#0d9488; border-radius:3px 3px 0 0;"></div>
+                    </div>
+                    <span style="font-size:0.72rem; font-weight:700; color:#334155; margin-top:5px;">인터넷 포털</span>
+                  </div>
+
+                  <!-- Pair 3: Online Video -->
+                  <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
+                    <div style="display:flex; gap:5px; align-items:flex-end; height:80px;">
+                      <div class="proto-bar" style="width:18px; height:75%; background:#2563eb; border-radius:3px 3px 0 0;"></div>
+                      <div class="proto-bar" style="width:18px; height:45%; background:#0d9488; border-radius:3px 3px 0 0;"></div>
+                    </div>
+                    <span style="font-size:0.72rem; font-weight:700; color:#334155; margin-top:5px;">온라인 동영상</span>
+                  </div>
+
+                  <!-- Pair 4: SNS -->
+                  <div style="display:flex; flex-direction:column; align-items:center; z-index:1;">
+                    <div style="display:flex; gap:5px; align-items:flex-end; height:80px;">
+                      <div class="proto-bar" style="width:18px; height:50%; background:#2563eb; border-radius:3px 3px 0 0;"></div>
+                      <div class="proto-bar" style="width:18px; height:30%; background:#0d9488; border-radius:3px 3px 0 0;"></div>
+                    </div>
+                    <span style="font-size:0.72rem; font-weight:700; color:#334155; margin-top:5px;">소셜미디어(SNS)</span>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:16px; margin-top:6px;">
+                  <span style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:#475569;">
+                    <span style="width:9px; height:9px; background:#2563eb; border-radius:2px;"></span> 뉴스 이용률 지표
+                  </span>
+                  <span style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:#475569;">
+                    <span style="width:9px; height:9px; background:#0d9488; border-radius:2px;"></span> 뉴스 신뢰도 지표
+                  </span>
+                </div>
+                <div class="seaborn-disclaimer">
+                  ※ 위 차트는 실제 분석 결과가 아니며, 향후 구현할 시각화 레이아웃 예시(Dummy Prototype)입니다.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>05. 데이터분석 계획</span>
+          <span>·</span>
+          <span>5단계 기초통계 분석 및 자료 형태별 시나리오</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">06 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 7: 예상되는 분석 방향 및 기대 효과
+         ========================================================== -->
+    <section class="slide" id="slide-7" data-index="7">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">06. 예상 분석 방향 & 기대 효과</div>
+          <h2 class="slide-title">분석 결과 시나리오와 학술적·실무적 기대 효과</h2>
+          <p class="slide-subtitle">실제 결과는 미정이며, 이용률과 신뢰도의 조합에 따라 도출될 수 있는 해석 프레임워크</p>
+        </div>
+        <div class="header-meta">IMPLICATIONS & SCENARIOS</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Left: 4-Quadrant Matrix with Seaborn Scatter Concept -->
+        <div class="col-half">
+          <div class="card" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div class="card-title" style="margin-bottom:0; font-size:0.92rem;">
+                  <span class="badge badge-blue">해석 프레임워크</span>
+                  이용-신뢰 2×2 매트릭스 시나리오
+                </div>
+                <span class="badge badge-amber">결과 사전단정 배제</span>
+              </div>
+              <p class="card-desc" style="font-size:0.76rem; margin-bottom:8px;">
+                분석 시 각 매체가 위치하게 될 사분면에 따라 다음과 같은 이론적 해석을 전개할 수 있습니다.
+              </p>
+            </div>
+
+            <!-- 2x2 Grid Boxes -->
+            <div class="grid-2" style="gap:8px; flex:1;">
+              <!-- Q2: 저이용 - 고신뢰 -->
+              <div class="card" style="background:#f8fafc; padding:8px 10px;">
+                <div style="font-weight:700; font-size:0.8rem; color:var(--brand-navy); margin-bottom:2px;">
+                  [저이용 · 고신뢰] 권위형 매체
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-sub); line-height:1.35;">
+                  일상 접촉은 적으나 검증 수준과 보도 공신력을 높게 평가 (예: 특정 공영/전통 방송)
+                </div>
+              </div>
+
+              <!-- Q1: 고이용 - 고신뢰 -->
+              <div class="card" style="background:#eff6ff; border-color:var(--brand-blue-border); padding:8px 10px;">
+                <div style="font-weight:700; font-size:0.8rem; color:var(--brand-blue); margin-bottom:2px;">
+                  [고이용 · 고신뢰] 주류 중심 매체
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-sub); line-height:1.35;">
+                  이용률과 신뢰도가 모두 높아 여론 형성에 가장 강력하고 안정적인 영향력 행사
+                </div>
+              </div>
+
+              <!-- Q3: 저이용 - 저신뢰 -->
+              <div class="card" style="background:#f8fafc; padding:8px 10px;">
+                <div style="font-weight:700; font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">
+                  [저이용 · 저신뢰] 주변형 매체
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-sub); line-height:1.35;">
+                  뉴스 소비 목적의 접근이 드물고 보도 신뢰도도 낮아 뉴스 매체로서 기능 제한
+                </div>
+              </div>
+
+              <!-- Q4: 고이용 - 저신뢰 (Core Phenomenon) -->
+              <div class="card" style="background:#fffbeb; border-color:#fde68a; padding:8px 10px;">
+                <div style="font-weight:700; font-size:0.8rem; color:var(--accent-amber); margin-bottom:2px;">
+                  [고이용 · 저신뢰] 습관형 매체 ⭐
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-sub); line-height:1.35;">
+                  알고리즘·자극성으로 많이 보지만 신뢰는 낮은 현상 (디지털 플랫폼의 역설적 소비)
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:0.68rem; color:var(--text-light); text-align:center; margin-top:6px;">
+              ※ 실제 데이터 집계 후 4대 매체가 어느 사분면에 안착하는지 객관적으로 검증할 예정입니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Expected Value & Insights -->
+        <div class="col-half">
+          <div class="card dark-navy" style="height:100%; display:flex; flex-direction:column; justify-content:space-around;">
+            <div>
+              <div class="card-title" style="color:#60a5fa; margin-bottom:6px;">
+                💡 연구가 가져올 학술적·사회적 기대 효과
+              </div>
+              <p class="card-desc" style="color:#cbd5e1; font-size:0.8rem; margin-bottom:12px;">
+                본 계획서에 따른 데이터분석이 완수되었을 때 얻을 수 있는 가치
+              </p>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="background:rgba(255,255,255,0.06); padding:10px 12px; border-radius:8px; border-left:3px solid #3b82f6;">
+                <div style="font-size:0.85rem; font-weight:700; color:#ffffff; margin-bottom:2px;">
+                  1. '노출 중심' 미디어 영향력 평가 오류 시정
+                </div>
+                <div style="font-size:0.76rem; color:#94a3b8; line-height:1.4;">
+                  단순 트래픽이나 페이지뷰만으로 매체의 사회적 영향력을 과대평가하는 오류를 방지하고, 질적 신뢰 차원의 중요성을 입증
+                </div>
+              </div>
+
+              <div style="background:rgba(255,255,255,0.06); padding:10px 12px; border-radius:8px; border-left:3px solid #0d9488;">
+                <div style="font-size:0.85rem; font-weight:700; color:#ffffff; margin-bottom:2px;">
+                  2. 디지털 뉴스 소비자의 모순적 태도 실증
+                </div>
+                <div style="font-size:0.76rem; color:#94a3b8; line-height:1.4;">
+                  "믿지 않으면서도 계속 소비하는" 현대 수용자의 역설적 미디어 소비 행태에 대해 정량적 데이터 기반의 근거 제시
+                </div>
+              </div>
+
+              <div style="background:rgba(255,255,255,0.06); padding:10px 12px; border-radius:8px; border-left:3px solid #f59e0b;">
+                <div style="font-size:0.85rem; font-weight:700; color:#ffffff; margin-bottom:2px;">
+                  3. 미디어 리터러시 및 플랫폼 정책 기초 자료
+                </div>
+                <div style="font-size:0.76rem; color:#94a3b8; line-height:1.4;">
+                  세대별 취약 매체군을 파악하여 허위정보 비판적 수용 교육과 플랫폼 알고리즘 공정성 가이드라인 마련에 기여
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>06. 예상 분석 방향 및 기대 효과</span>
+          <span>·</span>
+          <span>4분면 시나리오 매트릭스와 분석적 의의</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">07 / 08</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         SLIDE 8: 연구의 한계 및 향후 진행 계획
+         ========================================================== -->
+    <section class="slide" id="slide-8" data-index="8">
+      <div class="slide-header">
+        <div class="header-left">
+          <div class="slide-tag">07. 한계 및 향후 계획</div>
+          <h2 class="slide-title">연구의 한계점과 단계별 추진 로드맵</h2>
+          <p class="slide-subtitle">분석 방법론의 현실적 제약을 명시하고, 확정된 계획에 따른 체계적 실행 방안 제시</p>
+        </div>
+        <div class="header-meta">LIMITATIONS & ROADMAP</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Left: Methodological Limitations -->
+        <div class="col-half">
+          <div class="card amber-tint" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div class="card-title" style="color:#92400e; margin-bottom:8px;">
+                <span class="badge badge-amber">방법론적 한계</span>
+                사전 인지 및 분석 시 유의사항
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:9px;">
+                <div class="card" style="padding:10px 12px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy); margin-bottom:3px;">
+                    ① 생태학적 오류 (Ecological Fallacy) 주의
+                  </div>
+                  <div style="font-size:0.74rem; color:var(--text-sub); line-height:1.4;">
+                    집계된 매체별 평균 이용률과 평균 신뢰도 비교만으로는, <em>'특정 개인이 자주 보는 매체를 신뢰하는가'</em>에 대한 개인 수준의 직접 인과를 단정할 수 없음.
+                  </div>
+                </div>
+
+                <div class="card" style="padding:10px 12px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy); margin-bottom:3px;">
+                    ② 횡단면 데이터(Cross-sectional)의 한계
+                  </div>
+                  <div style="font-size:0.74rem; color:var(--text-sub); line-height:1.4;">
+                    특정 시점의 단면 조사이므로 인과의 선후관계(신뢰해서 많이 이용하는가, 많이 이용하다 보니 신뢰하게 되었는가)를 판별하기보다 현상적 상관성에 집중해야 함.
+                  </div>
+                </div>
+
+                <div class="card" style="padding:10px 12px; background:#ffffff;">
+                  <div style="font-weight:700; font-size:0.82rem; color:var(--brand-navy); margin-bottom:3px;">
+                    ③ 측정 단위 및 척도 상이성
+                  </div>
+                  <div style="font-size:0.74rem; color:var(--text-sub); line-height:1.4;">
+                    이용률(비율 %)과 신뢰도(점수 척도)의 측정 단위가 다르므로, 원시 수치의 단순 직접 비교가 아닌 <strong>매체 간 상대 순위(Ranking)와 표준화 지수</strong>를 통한 비교 필수.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:0.7rem; color:#b45309; font-weight:600; padding:2px 6px;">
+              * 본 한계점은 분석 결과 보고서 작성 시 과도한 일반화를 경계하는 기준으로 삼을 것입니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 4-Phase Roadmap & Reference -->
+        <div class="col-half">
+          <div class="card" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div class="card-title" style="margin-bottom:10px;">
+                <span class="badge badge-navy">추진 계획</span>
+                향후 단계별 실행 로드맵 (Roadmap)
+              </div>
+
+              <!-- 4-Phase Roadmap -->
+              <div style="display:flex; flex-direction:column; gap:9px;">
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                  <span class="badge badge-navy" style="font-family:var(--font-mono); margin-top:1px;">Phase 1</span>
+                  <div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--brand-navy);">자료 입수 및 변수 코드북 정밀 검토</div>
+                    <div style="font-size:0.73rem; color:var(--text-sub);">한국언론진흥재단 공식 사이트에서 최신 조사 연도 확정 및 척도 정의서 확인</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                  <span class="badge badge-blue" style="font-family:var(--font-mono); margin-top:1px;">Phase 2</span>
+                  <div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--brand-navy);">데이터 정제 (Data Cleaning) 및 표준화</div>
+                    <div style="font-size:0.73rem; color:var(--text-sub);">결측치 처리, 4대 매체 분류 매핑, 이용률/신뢰도 표준 비교 지표 산출</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                  <span class="badge badge-teal" style="font-family:var(--font-mono); margin-top:1px;">Phase 3</span>
+                  <div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--brand-navy);">기초 통계 산출 및 시각화 코드 구현</div>
+                    <div style="font-size:0.73rem; color:var(--text-sub);">Python Seaborn/Matplotlib을 활용한 병렬 막대 및 산점도 시각화</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                  <span class="badge badge-amber" style="font-family:var(--font-mono); margin-top:1px;">Phase 4</span>
+                  <div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--brand-navy);">최종 결과 해석 및 분석 보고서 작성</div>
+                    <div style="font-size:0.73rem; color:var(--text-sub);">핵심 연구 질문 검증, 일치/불일치 원인 고찰, 결론 도출</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Official Reference Box -->
+            <div style="background:var(--bg-subtle); border-radius:8px; border:1px solid var(--border-light); padding:10px 12px;">
+              <div style="font-size:0.73rem; font-weight:700; color:var(--brand-navy); margin-bottom:3px;">
+                📚 공식 참조 데이터베이스 (Reference)
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:6px;">
+                한국언론진흥재단 「언론수용자 조사」 정기 간행 데이터
+              </div>
+              <a href="https://media.kpf.or.kr/web/media/main.do?dbComFileId=TR10152202" target="_blank" class="btn-link" style="width:100%; justify-content:center; padding:7px 10px; font-size:0.75rem;">
+                한국언론진흥재단 공식 자료실 바로가기 ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-left">
+          <span>07. 연구의 한계 및 향후 진행 계획</span>
+          <span>·</span>
+          <span>방법론적 제약과 4단계 추진 로드맵</span>
+        </div>
+        <div class="footer-right">
+          <div class="slide-counter">08 / 08</div>
+        </div>
+      </div>
+    </section>
+
+  </div> <!-- /#deck-wrapper -->
+
+  <!-- Anime.js CDN (Motion Graphic Engine) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <!-- Interactive Slide Deck Engine -->
+  <script>
+    (function() {
+      const slides = document.querySelectorAll('.slide');
+      const totalSlides = slides.length;
+      let currentIndex = 0;
+      
+      const progressBar = document.getElementById('progress-bar');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+      const btnFullscreen = document.getElementById('btn-fullscreen');
+      const dotsContainer = document.getElementById('dots-container');
+
+      // Create Dots for all slides
+      if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        for (let i = 0; i < totalSlides; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'dot' + (i === 0 ? ' active' : '');
+          dot.addEventListener('click', () => goToSlide(i));
+          dotsContainer.appendChild(dot);
+        }
+      }
+
+      function updateDots(index) {
+        if (!dotsContainer) return;
+        const dots = dotsContainer.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+          if (idx === index) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      // Slide Navigation Core
+      function goToSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+
+        slides[currentIndex].classList.remove('active');
+        currentIndex = index;
+        slides[currentIndex].classList.add('active');
+
+        // Progress bar width
+        const progressPercent = ((currentIndex + 1) / totalSlides) * 100;
+        progressBar.style.width = progressPercent + '%';
+
+        // Update Dots
+        updateDots(currentIndex);
+
+        // Run Anime.js animations
+        triggerSlideAnimations(currentIndex + 1);
+      }
+
+      function nextSlide() { goToSlide(currentIndex + 1); }
+      function prevSlide() { goToSlide(currentIndex - 1); }
+
+      // Keyboard Controls
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          prevSlide();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          goToSlide(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          goToSlide(totalSlides - 1);
+        } else if (e.key === 'f' || e.key === 'F') {
+          toggleFullscreen();
+        }
+      });
+
+      // Button Listeners
+      btnPrev.addEventListener('click', prevSlide);
+      btnNext.addEventListener('click', nextSlide);
+
+      // Fullscreen Toggle
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+      btnFullscreen.addEventListener('click', toggleFullscreen);
+
+      // Anime.js Motion Graphics System
+      function triggerSlideAnimations(slideNum) {
+        if (typeof anime === 'undefined') return;
+
+        const currentSlideEl = document.getElementById('slide-' + slideNum);
+        if (!currentSlideEl) return;
+
+        // Slide 1: Cover Graphic Stagger
+        if (slideNum === 1) {
+          anime({
+            targets: '#cover-svg-element path',
+            strokeDashoffset: [anime.setDashoffset, 0],
+            easing: 'easeInOutSine',
+            duration: 1000,
+            delay: anime.stagger(150, {start: 200})
+          });
+          anime({
+            targets: '#cover-svg-element .cv-pillar',
+            translateY: [25, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(160, {start: 350}),
+            easing: 'easeOutQuad',
+            duration: 700
+          });
+          anime({
+            targets: '#cv-center-hub',
+            scale: [0.7, 1],
+            opacity: [0, 1],
+            easing: 'easeOutBack',
+            duration: 750,
+            delay: 550
+          });
+        }
+
+        // Generic Slide: Card Fade-in Stagger
+        const cards = currentSlideEl.querySelectorAll('.card, .pipeline-step');
+        if (cards.length > 0) {
+          anime({
+            targets: cards,
+            translateY: [12, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(60, {start: 80}),
+            easing: 'easeOutQuad',
+            duration: 500
+          });
+        }
+
+        // Slide 5: Conceptual Flow Animation
+        if (slideNum === 5) {
+          anime({
+            targets: '#variable-model-svg path',
+            strokeDashoffset: [anime.setDashoffset, 0],
+            easing: 'easeInOutCubic',
+            duration: 900,
+            delay: anime.stagger(180, {start: 250})
+          });
+        }
+
+        // Slide 6: Seaborn Dual-Bar Chart Growth
+        if (slideNum === 6) {
+          const bars = currentSlideEl.querySelectorAll('.proto-bar');
+          anime({
+            targets: bars,
+            scaleY: [0, 1],
+            transformOrigin: 'bottom',
+            delay: anime.stagger(70, {start: 250}),
+            easing: 'easeOutElastic(1, .85)',
+            duration: 850
+          });
+        }
+      }
+
+      // Initial Slide Run
+      goToSlide(0);
+    })();
+  </script>
+</body>
+</html>
